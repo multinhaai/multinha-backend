@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -18,19 +17,18 @@ const openai = new OpenAI({
 app.post('/gerar-contestacao', async (req, res) => {
   const dados = req.body;
 
-  const prompt = \`Aja como um advogado brasileiro especializado em infrações de trânsito. Com base nas informações a seguir, redija uma contestação formal e bem fundamentada para cancelar ou postergar a penalidade:
-
-Nome: \${dados.nome}
-CPF: \${dados.cpf}
-E-mail: \${dados.email}
-Telefone: \${dados.telefone}
-Auto de Infração: \${dados.numero_multa}
-Placa: \${dados.placa}
-Data da infração: \${dados.data_infracao}
-Data da notificação: \${dados.data_notificacao}
-Relato do condutor: \${dados.explicacao || 'Não informado'}
-
-Finalize com solicitação de deferimento e assinatura.\`;
+  const prompt = 
+    "Aja como um advogado brasileiro especializado em infrações de trânsito. Com base nas informações a seguir, redija uma contestação formal e bem fundamentada para cancelar ou postergar a penalidade:\n\n" +
+    "Nome: " + dados.nome + "\n" +
+    "CPF: " + dados.cpf + "\n" +
+    "E-mail: " + dados.email + "\n" +
+    "Telefone: " + dados.telefone + "\n" +
+    "Auto de Infração: " + dados.numero_multa + "\n" +
+    "Placa: " + dados.placa + "\n" +
+    "Data da infração: " + dados.data_infracao + "\n" +
+    "Data da notificação: " + dados.data_notificacao + "\n" +
+    "Relato do condutor: " + (dados.explicacao || 'Não informado') + "\n\n" +
+    "Finalize com solicitação de deferimento e assinatura.";
 
   try {
     const response = await openai.chat.completions.create({
@@ -52,7 +50,7 @@ Finalize com solicitação de deferimento e assinatura.\`;
     });
 
     const pdfBytes = await pdfDoc.save();
-    const filePath = \`./contestacao_\${Date.now()}.pdf\`;
+    const filePath = `./contestacao_${Date.now()}.pdf`;
     fs.writeFileSync(filePath, pdfBytes);
 
     const transporter = nodemailer.createTransport({
@@ -64,7 +62,7 @@ Finalize com solicitação de deferimento e assinatura.\`;
     });
 
     await transporter.sendMail({
-      from: \`Multinha <\${process.env.EMAIL_REMETENTE}>\`,
+      from: `Multinha <${process.env.EMAIL_REMETENTE}>`,
       to: dados.email,
       subject: 'Sua Contestação Está Pronta',
       text: 'Segue em anexo sua defesa gerada com inteligência artificial.',
